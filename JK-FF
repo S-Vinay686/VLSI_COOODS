@@ -1,0 +1,49 @@
+// Source code for JK flip-flop
+
+module JKFF(J, K, clk, Q, Qbar);
+
+  input J, K, clk;
+  output reg Q, Qbar;
+
+  always @ (posedge clk)
+  begin
+    if (J == 1 && K == 0)
+      Qbar = 1;
+    else if (J == 0 && K == 1)
+      Qbar = 0;
+    else if (J == 1 && K == 1)
+      Qbar = ~Qbar;
+  end
+
+endmodule
+--------------------------------------
+
+// Test bench
+module tb_JKFF();
+
+  wire Q;
+  wire Qbar;
+  reg j;
+  reg k;
+  reg clk;
+  reg reset;
+
+  jk_flipflop dut (.Q(Q), .Qbar(Qbar), .J(j), .clk(clk), .K(K), .reset(reset));
+
+  always #10 clk = ~clk;
+
+  initial begin
+    clk = 0;
+    reset = 0;
+    k = 1;
+    j <= 0;
+    #100;
+    k = 0;
+    j <= 1;
+    #100;
+    j <= 0;
+    #100;
+    j <= 1;
+    $finish;
+    end
+    endmodule
