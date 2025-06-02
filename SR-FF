@@ -1,0 +1,38 @@
+@// Source code for SR flip-flop
+module SRFF(S, R, Clk, Q, Qbar);
+  input S, R, Clk;
+  output Q, Qbar;
+  reg M, N;
+  always @ (posedge clk)
+  begin
+    M = !(S & clk);
+    N = !(R & clk);
+  end
+  assign Q = !(M & Qbar);
+  assign Qbar = !(N & Q);
+endmodule
+
+// Test Bench for SR Flip-Flop
+module tb_SRFF();
+
+  wire Q;
+  wire Qbar;
+  reg S;
+  reg R;
+  reg clk;
+  SRFF dut (.Q(Q), .Qbar(Qbar), .S(S), .R(R), .Clk(clk));
+  always #10 clk = ~clk;
+  initial begin
+    clk = 0;
+    R = 1;
+    S <= 0;
+    #100;
+    R = 0;
+    S <= 1;
+    #100;
+    S <= 0;
+    #100;
+    S <= 1;
+    $finish;
+    end
+    endmodule
