@@ -1,0 +1,43 @@
+// Source code for D-flipflop
+module DFF (Q, Qbar, D, Clk, Reset);
+  output reg Q;
+  output reg Qbar;
+  input D, Clk, Reset;
+
+  always @ (posedge Clk)
+  begin
+    if (Reset == 1'b1)
+      Q <= 1'b0;
+    else
+      Q <= D;
+  end
+
+  assign Qbar = ~Q;
+endmodule
+
+// Test Bench
+module tb_DFF();
+  wire Q;
+  wire Qbar;
+  reg D;
+  reg clk;
+  reg reset;
+
+  DFF dut (Q, Qbar, D, clk, reset);
+
+  always #10 clk = ~clk;
+
+  initial begin
+    clk = 0;
+    reset = 1;
+    D <= 0;
+    #100;
+    reset = 0;
+    D = 1;
+    #100;
+    D <= 0;
+    #100;
+    D <= 1;
+    $finish;
+    end
+   endmodule
