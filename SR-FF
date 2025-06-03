@@ -1,38 +1,52 @@
 @// Source code for SR flip-flop
-module SRFF(S, R, Clk, Q, Qbar);
-  input S, R, Clk;
-  output Q, Qbar;
-  reg M, N;
-  always @ (posedge clk)
-  begin
-    M = !(S & clk);
-    N = !(R & clk);
+module SRFF(S, R, clk, Q, Qbar);
+  input S, R, clk;
+  output reg Q;
+  output Qbar;
+
+  assign Qbar = ~Q;
+
+  always @(posedge clk) begin
+    if (S == 0 && R == 0)
+      Q <= Q;         // No change
+    else if (S == 0 && R == 1)
+      Q <= 0;         // Reset
+    else if (S == 1 && R == 0)
+      Q <= 1;         // Set
+    else
+      Q <= 1'bx;      // Invalid (S=1, R=1)
   end
-  assign Q = !(M & Qbar);
-  assign Qbar = !(N & Q);
 endmodule
 
 // Test Bench for SR Flip-Flop
+
 module tb_SRFF();
 
-  wire Q;
-  wire Qbar;
-  reg S;
-  reg R;
-  reg clk;
-  SRFF dut (.Q(Q), .Qbar(Qbar), .S(S), .R(R), .Clk(clk));
+  wire Q, Qbar;
+  reg S, R, clk;
+
+  SRFF dut (.Q(Q), .Qbar(Qbar), .S(S), .R(R), .clk(clk));
+
   always #10 clk = ~clk;
+
   initial begin
     clk = 0;
-    R = 1;
-    S <= 0;
-    #100;
-    R = 0;
-    S <= 1;
-    #100;
-    S <= 0;
-    #100;
-    S <= 1;
+    S = 0; R = 0;  // No change
+    #20;
+
+    S = 1; R = 0;  // Set
+    #20;
+
+    S = 0; R = 1;  // Reset
+    #20;
+
+    S = 1; R = 1;  // Invalid condition
+    #20;
+
+    S = 0; R = 0;  // No change
+    #20;
+
     $finish;
-    end
-    endmodule
+  end
+endmodule
+
