@@ -1,49 +1,55 @@
-// Source code for JK flip-flop
+ Source code for JK flip-flop
 
-module JKFF(J, K, clk, Q, Qbar);
+module JKFF(J, K, clk, reset, Q, Qbar);
+  input J, K, clk, reset;
+  output reg Q;
+  output Qbar;
 
-  input J, K, clk;
-  output reg Q, Qbar;
+  assign Qbar = ~Q;
 
-  always @ (posedge clk)
-  begin
-    if (J == 1 && K == 0)
-      Qbar = 1;
-    else if (J == 0 && K == 1)
-      Qbar = 0;
-    else if (J == 1 && K == 1)
-      Qbar = ~Qbar;
+  always @ (posedge clk) begin
+    if (reset)
+      Q <= 0;
+    else begin
+      case ({J, K})
+        2'b00: Q <= Q;       // No change
+        2'b01: Q <= 0;       // Reset
+        2'b10: Q <= 1;       // Set
+        2'b11: Q <= ~Q;      // Toggle
+      endcase
+    end
   end
-
 endmodule
+
 --------------------------------------
 
 // Test bench
+
 module tb_JKFF();
 
-  wire Q;
-  wire Qbar;
-  reg j;
-  reg k;
-  reg clk;
-  reg reset;
+  wire Q, Qbar;
+  reg j, k, clk, reset;
 
-  jk_flipflop dut (.Q(Q), .Qbar(Qbar), .J(j), .clk(clk), .K(K), .reset(reset));
+  JKFF dut (.J(j), .K(k), .clk(clk), .reset(reset), .Q(Q), .Qbar(Qbar));
 
   always #10 clk = ~clk;
 
   initial begin
     clk = 0;
+    reset = 1;
+    j = 0; k = 0;
+    #20;
+
     reset = 0;
-    k = 1;
-    j <= 0;
-    #100;
-    k = 0;
-    j <= 1;
-    #100;
-    j <= 0;
-    #100;
-    j <= 1;
+
+    // Apply inputs
+    j = 0; k = 1; #20; // Reset
+    j = 1; k = 0; #20; // Set
+    j = 1; k = 1; #20; // Toggle
+    j = 0; k = 0; #20; // No change
+    j = 1; k = 1; #20; // Toggle again
+
     $finish;
-    end
-    endmodule
+  end
+endmodule
+
